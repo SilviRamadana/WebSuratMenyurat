@@ -17,14 +17,21 @@ class UserController extends Controller
 
     public function create()
     {
-        $divisions = $this->divisionOptions();
-        $roles = ['User', 'Admin'];
+        $user = request()->user();
+        $isAdmin = $user && $user->role === 'Admin';
+        $isLimited = !$isAdmin;
+        $divisions = $isAdmin ? $this->divisionOptions() : [$user->division];
+        $roles = $isAdmin ? ['User', 'Admin'] : ['User'];
 
-        return view('users.create', compact('divisions', 'roles'));
+        return view('users.create', compact('divisions', 'roles', 'isLimited'));
     }
 
     public function store(Request $request)
     {
+        $creator = $request->user();
+        $isAdmin = $creator && $creator->role === 'Admin';
+        $allowedRoles = $isAdmin ? ['User', 'Admin'] : ['User'];
+
         $data = $request->validate([
             'username' => ['required', 'string', 'max:50', 'unique:users,username'],
             'division' => [
@@ -34,10 +41,14 @@ class UserController extends Controller
                 'max:80',
                 Rule::exists('divisions', 'name'),
             ],
-            'role' => ['required', 'in:User,Admin'],
+            'role' => ['required', Rule::in($allowedRoles)],
             'email' => ['required', 'email', 'max:120', 'unique:users,email'],
             'password' => ['required', 'string', 'min:6'],
         ]);
+
+        if (!$isAdmin) {
+            $data['division'] = $creator->division;
+        }
 
         if (empty($data['division'])) {
             $data['division'] = null;
@@ -98,6 +109,13 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('users.create')->with('status', 'Akun berhasil dihapus.');
+    }
+
+    public function profile(Request $request)
+    {
+        $user = $request->user();
+
+        return view('users.profile', compact('user'));
     }
 
     private function divisionOptions(): array

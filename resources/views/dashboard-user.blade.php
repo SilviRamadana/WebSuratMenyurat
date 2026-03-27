@@ -9,7 +9,11 @@
 <div class="mx-auto w-full max-w-6xl">
     <section class="grid h-[calc(100vh-200px)] grid-cols-12 gap-2 overflow-hidden">
         <div class="col-span-7 flex h-[86px] items-center justify-between rounded-3xl border border-pink-100 bg-white/90 px-5 py-3 shadow-[0_26px_50px_-40px_rgba(236,72,153,0.45)]">
-            <h1 class="text-lg font-semibold text-slate-900">Selamat Datang, Admin {{ auth()->user()->username }}</h1>
+            <a href="{{ route('users.profile') }}" class="group flex flex-col">
+                <div class="text-[11px] uppercase tracking-widest text-pink-600">Divisi</div>
+                <div class="text-lg font-semibold text-slate-900 group-hover:text-pink-700 transition">{{ auth()->user()->division ?? '-' }}</div>
+                <div class="text-xs text-slate-500">{{ auth()->user()->username }}</div>
+            </a>
             <a href="{{ route('surat.create') }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-pink-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-pink-700">
                 <i data-lucide="plus" class="h-4 w-4"></i>
                 Buat Surat
@@ -38,8 +42,8 @@
             </a>
         </div>
 
-        <div class="col-span-8 flex flex-col rounded-3xl border border-pink-100 bg-white/90 p-4 shadow-sm" style="height: calc(100vh - 200px - 86px - 84px - 8px);">
-            <div class="mb-2 flex items-center justify-between">
+        <div class="col-span-8 flex flex-col gap-3 rounded-3xl border border-pink-100 bg-white/90 p-4 shadow-sm" style="height: calc(100vh - 200px - 86px - 84px - 8px);">
+            <div class="flex items-center justify-between">
                 <h2 class="text-sm font-semibold text-slate-900">Surat Masuk Terbaru</h2>
                 <a href="{{ route('surat.inbox') }}" class="text-xs font-semibold text-pink-700 hover:text-pink-800">Lihat Semua</a>
             </div>
@@ -123,9 +127,9 @@
                     {
                         label: 'Surat Masuk',
                         data: masukData,
-                        borderColor: '#ff73ea',
-                        backgroundColor: 'rgba(255, 115, 234, 0.18)',
-                        pointBackgroundColor: '#ff9cf0',
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.18)',
+                        pointBackgroundColor: '#15803d',
                         pointRadius: 3,
                         tension: 0.35,
                         fill: true,
@@ -133,9 +137,9 @@
                     {
                         label: 'Surat Keluar',
                         data: keluarData,
-                        borderColor: '#ffd0f7',
-                        backgroundColor: 'rgba(255, 208, 247, 0.12)',
-                        pointBackgroundColor: '#ffe6fb',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.16)',
+                        pointBackgroundColor: '#dc2626',
                         pointRadius: 3,
                         tension: 0.35,
                         fill: true,
@@ -149,7 +153,7 @@
                     legend: {
                         display: true,
                         labels: {
-                            color: '#f5f2ff',
+                            color: '#334155',
                             boxWidth: 12,
                             usePointStyle: true,
                         },
@@ -159,11 +163,11 @@
                     y: {
                         beginAtZero: true,
                         suggestedMax: maxValue + 1,
-                        ticks: { precision: 0, color: '#e8dff7' },
-                        grid: { color: 'rgba(255, 122, 232, 0.18)' },
+                        ticks: { precision: 0, color: '#475569' },
+                        grid: { color: 'rgba(148, 163, 184, 0.35)' },
                     },
                     x: {
-                        ticks: { color: '#f5f2ff' },
+                        ticks: { color: '#475569' },
                         grid: { display: false },
                     },
                 },

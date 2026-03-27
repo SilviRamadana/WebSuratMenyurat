@@ -13,7 +13,6 @@
                 <a class="rounded-full px-4 py-2 text-sm font-semibold transition {{ $filter === 'read' ? 'bg-pink-600 text-white shadow-sm' : 'border border-pink-200 bg-white text-pink-700 hover:bg-pink-50' }}" href="{{ route('notifications.index', ['status' => 'read']) }}">Dibaca</a>
             </div>
         </div>
-        <a class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:bg-pink-50" href="{{ route('dashboard') }}">Dashboard</a>
     </div>
 
     @if ($notifications->isEmpty())

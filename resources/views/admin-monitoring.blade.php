@@ -4,10 +4,14 @@
 
 @section('content')
 <script src="https://unpkg.com/lucide@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 @php
     $totalMasuk = collect($divisionMonitoring ?? [])->sum('masuk_count');
     $totalKeluar = collect($divisionMonitoring ?? [])->sum('keluar_count');
+    $chartLabels = collect($divisionMonitoring ?? [])->pluck('name')->values();
+    $chartMasuk = collect($divisionMonitoring ?? [])->pluck('masuk_count')->values();
+    $chartKeluar = collect($divisionMonitoring ?? [])->pluck('keluar_count')->values();
 @endphp
 
 <div class="rounded-3xl border border-pink-100 bg-white/90 p-8 shadow-[0_30px_60px_-40px_rgba(236,72,153,0.45)]">
@@ -30,6 +34,24 @@
         <div class="rounded-2xl border border-pink-100 bg-pink-50/50 px-4 py-3">
             <div class="text-xs uppercase tracking-wider text-slate-500">Total Surat Keluar</div>
             <div class="mt-1 text-2xl font-semibold text-slate-900">{{ $totalKeluar }}</div>
+        </div>
+    </div>
+
+    <div class="mb-5 rounded-2xl border border-pink-100 bg-white p-4">
+        <div class="mb-3 flex items-center justify-between">
+            <div>
+                <div class="text-xs font-semibold uppercase tracking-widest text-pink-600">Grafik</div>
+                <div class="text-lg font-semibold text-slate-900">Surat per Divisi</div>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-slate-500">
+                <span class="inline-flex h-2.5 w-2.5 rounded-full bg-pink-500"></span>
+                Masuk
+                <span class="ml-3 inline-flex h-2.5 w-2.5 rounded-full bg-rose-500"></span>
+                Keluar
+            </div>
+        </div>
+        <div class="h-[260px]">
+            <canvas id="divisionChart"></canvas>
         </div>
     </div>
 
@@ -65,5 +87,68 @@
 
 <script>
     lucide.createIcons();
+
+    const divisionChartEl = document.getElementById('divisionChart');
+    if (divisionChartEl) {
+        const labels = @json($chartLabels ?? []);
+        const masukData = @json($chartMasuk ?? []);
+        const keluarData = @json($chartKeluar ?? []);
+
+        new Chart(divisionChartEl, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Surat Masuk',
+                        data: masukData,
+                        backgroundColor: 'rgba(22, 163, 74, 0.75)',
+                        borderRadius: 8,
+                    },
+                    {
+                        label: 'Surat Keluar',
+                        data: keluarData,
+                        backgroundColor: 'rgba(239, 68, 68, 0.75)',
+                        borderRadius: 8,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        padding: 10,
+                    },
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            color: '#475569',
+                            maxRotation: 45,
+                            minRotation: 0,
+                        },
+                        grid: {
+                            display: false,
+                        },
+                    },
+                    y: {
+                        ticks: {
+                            color: '#475569',
+                            precision: 0,
+                        },
+                        grid: {
+                            color: 'rgba(226, 232, 240, 0.7)',
+                        },
+                        beginAtZero: true,
+                    },
+                },
+            },
+        });
+    }
 </script>
 @endsection

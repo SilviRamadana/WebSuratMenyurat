@@ -98,6 +98,7 @@
 <body>
     @php
         $jenisRaw = strtolower(trim((string) $surat->jenis));
+        $jenisSafe = trim((string) $surat->jenis);
         $docTitle = 'SURAT INTERNAL ANTAR DIVISI';
         $jenisLabel = 'Permintaan';
 
@@ -108,8 +109,20 @@
             $docTitle = 'LAPORAN INTERNAL';
             $jenisLabel = 'Laporan';
         } else {
-            $docTitle = 'SURAT PERMINTAAN INTERNAL';
-            $jenisLabel = 'Permintaan';
+            $docTitle = $jenisSafe === '' ? 'SURAT INTERNAL' : ('SURAT ' . strtoupper($jenisSafe));
+            $jenisLabel = $jenisSafe === '' ? 'Internal' : $jenisSafe;
+        }
+    @endphp
+
+    @php
+        $tembusanItems = collect($surat->tembusan_list ?? $surat->cc_divisions ?? [])
+            ->map(fn ($item) => trim((string) $item))
+            ->filter()
+            ->values()
+            ->all();
+        $hasTembusan = count($tembusanItems) > 0;
+        if ($hasTembusan && !collect($tembusanItems)->contains(fn ($item) => strtolower($item) === 'arsip')) {
+            $tembusanItems[] = 'Arsip';
         }
     @endphp
 
@@ -156,5 +169,16 @@
         <div>(....................................)</div>
         <div>{{ $surat->sender_division }}</div>
     </div>
+
+    @if ($hasTembusan)
+        <div class="closing" style="margin-top: 18px;">
+            <div style="font-weight: bold;">Tembusan:</div>
+            <ol style="margin: 6px 0 0 18px; padding: 0;">
+                @foreach ($tembusanItems as $item)
+                    <li>{{ $item }}</li>
+                @endforeach
+            </ol>
+        </div>
+    @endif
 </body>
 </html>

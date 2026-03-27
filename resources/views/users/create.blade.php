@@ -22,30 +22,49 @@
 
         <div class="sm:col-span-1">
             <label for="division" class="text-sm font-semibold text-slate-700">Divisi</label>
-            <select id="division" name="division"
-                class="mt-2 w-full rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm text-pink-100 shadow-sm outline-none transition focus:border-pink-300 focus:ring-2 focus:ring-pink-300/40">
-                <option value="">- Tanpa divisi (Admin) -</option>
-                @foreach ($divisions as $division)
-                    <option value="{{ $division }}" @selected(old('division') === $division)>{{ $division }}</option>
-                @endforeach
-            </select>
+            @if (!empty($isLimited))
+                <div class="mt-2 rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm font-medium text-pink-100">
+                    {{ auth()->user()->division }}
+                </div>
+                <input type="hidden" name="division" value="{{ auth()->user()->division }}">
+                <div class="mt-2 text-xs text-pink-100/70">Divisi otomatis mengikuti akun Anda.</div>
+            @else
+                <select id="division" name="division"
+                    class="mt-2 w-full rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm text-pink-100 shadow-sm outline-none transition focus:border-pink-300 focus:ring-2 focus:ring-pink-300/40">
+                    <option value="">- Tanpa divisi (Admin) -</option>
+                    @foreach ($divisions as $division)
+                        <option value="{{ $division }}" @selected(old('division') === $division)>{{ $division }}</option>
+                    @endforeach
+                </select>
+            @endif
             @error('division')
                 <div class="mt-2 text-sm text-rose-600">{{ $message }}</div>
             @enderror
         </div>
 
-        <div class="sm:col-span-1">
-            <label for="role" class="text-sm font-semibold text-slate-700">Role</label>
-            <select id="role" name="role" required
-                class="mt-2 w-full rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm text-pink-100 shadow-sm outline-none transition focus:border-pink-300 focus:ring-2 focus:ring-pink-300/40">
-                @foreach ($roles as $role)
-                    <option value="{{ $role }}" @selected(old('role') === $role)>{{ $role }}</option>
-                @endforeach
-            </select>
-            @error('role')
-                <div class="mt-2 text-sm text-rose-600">{{ $message }}</div>
-            @enderror
-        </div>
+        @if (!empty($isLimited))
+            <div class="sm:col-span-1">
+                <label class="text-sm font-semibold text-slate-700">Role</label>
+                <div class="mt-2 rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm font-medium text-pink-100">
+                    User
+                </div>
+                <input type="hidden" name="role" value="User">
+                <div class="mt-2 text-xs text-pink-100/70">Role otomatis User.</div>
+            </div>
+        @else
+            <div class="sm:col-span-1">
+                <label for="role" class="text-sm font-semibold text-slate-700">Role</label>
+                <select id="role" name="role" required
+                    class="mt-2 w-full rounded-2xl border border-pink-200/60 bg-black/40 px-4 py-3 text-sm text-pink-100 shadow-sm outline-none transition focus:border-pink-300 focus:ring-2 focus:ring-pink-300/40">
+                    @foreach ($roles as $role)
+                        <option value="{{ $role }}" @selected(old('role') === $role)>{{ $role }}</option>
+                    @endforeach
+                </select>
+                @error('role')
+                    <div class="mt-2 text-sm text-rose-600">{{ $message }}</div>
+                @enderror
+            </div>
+        @endif
 
         <div class="sm:col-span-1">
             <label for="email" class="text-sm font-semibold text-slate-700">Email</label>

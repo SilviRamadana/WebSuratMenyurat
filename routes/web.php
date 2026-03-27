@@ -34,6 +34,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/surat/{surat}/pdf', [SuratController::class, 'downloadPdf'])->name('surat.pdf');
     Route::get('/surat/{surat}/lampiran', [SuratController::class, 'attachment'])->name('surat.attachment');
     Route::post('/surat/{surat}/arsip', [SuratController::class, 'archive'])->name('surat.archive.store');
+    Route::post('/surat/{surat}/arsip/batal', [SuratController::class, 'unarchive'])->name('surat.archive.remove');
     Route::post('/surat/{surat}/selesai', [SuratController::class, 'markDone'])->name('surat.done');
     Route::get('/surat/{surat}/balas', [SuratController::class, 'replyForm'])->name('surat.reply');
     Route::post('/surat/{surat}/balas', [SuratController::class, 'replyStore'])->name('surat.reply.store');
@@ -43,10 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifikasi/{notification}', [NotificationController::class, 'open'])->name('notifications.open');
 
+    Route::get('/akun/tambah', [UserController::class, 'create'])->name('users.create');
+    Route::post('/akun', [UserController::class, 'store'])->name('users.store');
+    Route::get('/profil', [UserController::class, 'profile'])->name('users.profile');
+
     Route::middleware('admin')->group(function () {
         Route::get('/akun', [UserController::class, 'index'])->name('users.index');
-        Route::get('/akun/tambah', [UserController::class, 'create'])->name('users.create');
-        Route::post('/akun', [UserController::class, 'store'])->name('users.store');
         Route::get('/akun/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/akun/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/akun/{user}', [UserController::class, 'destroy'])->name('users.destroy');
@@ -57,5 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/divisi/{division}/edit', [DivisionController::class, 'edit'])->name('divisions.edit');
         Route::put('/divisi/{division}', [DivisionController::class, 'update'])->name('divisions.update');
         Route::delete('/divisi/{division}', [DivisionController::class, 'destroy'])->name('divisions.destroy');
+
+        Route::get('/admin/surat', [SuratController::class, 'adminIndex'])->name('admin.surat.index');
     });
 });

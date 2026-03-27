@@ -46,7 +46,12 @@ class AppServiceProvider extends ServiceProvider
             $view->with('globalNotifItems', $notifItems);
 
             if ($user->role !== 'Admin') {
-                $sidebarMasukCount = Surat::where('recipient_division', $user->division)
+                $division = $user->division;
+
+                $sidebarMasukCount = Surat::where(function ($query) use ($division) {
+                    $query->where('recipient_division', $division)
+                        ->orWhereJsonContains('cc_divisions', $division);
+                })
                     ->whereNull('archived_at')
                     ->count();
 
@@ -55,7 +60,10 @@ class AppServiceProvider extends ServiceProvider
                     ->where('status', 'Terkirim')
                     ->count();
 
-                $sidebarArsipCount = Surat::where('recipient_division', $user->division)
+                $sidebarArsipCount = Surat::where(function ($query) use ($division) {
+                    $query->where('recipient_division', $division)
+                        ->orWhereJsonContains('cc_divisions', $division);
+                })
                     ->whereNotNull('archived_at')
                     ->count();
 

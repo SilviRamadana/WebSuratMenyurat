@@ -14,8 +14,11 @@ class Surat extends Model
         'sender_user_id',
         'sender_division',
         'recipient_division',
+        'cc_divisions',
+        'tembusan_list',
         'nomor_surat',
         'jenis',
+        'template_name',
         'judul',
         'isi',
         'lampiran_path',
@@ -29,6 +32,8 @@ class Surat extends Model
     ];
 
     protected $casts = [
+        'cc_divisions' => 'array',
+        'tembusan_list' => 'array',
         'sent_at' => 'datetime',
         'read_at' => 'datetime',
         'replied_at' => 'datetime',

@@ -122,11 +122,9 @@ class DashboardController extends Controller
 
                 $labels[] = $start->format('d M');
                 $masuk[] = Surat::where('recipient_division', $user->division)
-                    ->whereNull('archived_at')
                     ->whereBetween('sent_at', [$start, $end])
                     ->count();
                 $keluar[] = Surat::where('sender_division', $user->division)
-                    ->whereNull('archived_at')
                     ->where('status', 'Terkirim')
                     ->whereBetween('sent_at', [$start, $end])
                     ->count();
@@ -138,11 +136,9 @@ class DashboardController extends Controller
 
                 $labels[] = $start->format('M y');
                 $masuk[] = Surat::where('recipient_division', $user->division)
-                    ->whereNull('archived_at')
                     ->whereBetween('sent_at', [$start, $end])
                     ->count();
                 $keluar[] = Surat::where('sender_division', $user->division)
-                    ->whereNull('archived_at')
                     ->where('status', 'Terkirim')
                     ->whereBetween('sent_at', [$start, $end])
                     ->count();

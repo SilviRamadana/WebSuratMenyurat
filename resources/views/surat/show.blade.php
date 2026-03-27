@@ -22,9 +22,21 @@
                         <button class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:bg-pink-50" type="submit">Selesai</button>
                     </form>
                 @endif
+                @php
+                    $isArchived = !empty($surat->archived_at);
+                @endphp
                 <form method="POST" action="{{ route('surat.archive.store', $surat) }}">
                     @csrf
-                    <button class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:bg-pink-50" type="submit">Arsipkan</button>
+                    <button class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold {{ $isArchived ? 'text-emerald-700 bg-emerald-50 border-emerald-200 cursor-not-allowed' : 'text-pink-700 hover:bg-pink-50' }} shadow-sm transition" type="submit" {{ $isArchived ? 'disabled' : '' }}>
+                        @if ($isArchived)
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Terarsip
+                        @else
+                            Arsipkan
+                        @endif
+                    </button>
                 </form>
             </div>
         </div>
@@ -51,15 +63,24 @@
             <div class="mt-1 text-xl font-semibold text-slate-900">Surat Internal</div>
         </div>
 
+        @php
+            $ccList = collect($surat->tembusan_list ?? $surat->cc_divisions ?? [])->filter()->implode(', ');
+            $documentTitle = filled($surat->jenis) ? strtoupper($surat->jenis) : 'SURAT INTERNAL';
+        @endphp
+
         <div class="mt-4 grid gap-3 text-sm text-slate-600 sm:grid-cols-2">
             <div><span class="font-semibold text-slate-800">Nomor:</span> {{ $surat->nomor_surat ?? '-' }}</div>
             <div><span class="font-semibold text-slate-800">Tanggal:</span> {{ optional($surat->sent_at)?->timezone(config('app.timezone'))->format('d M Y H:i') ?? '-' }}</div>
             <div><span class="font-semibold text-slate-800">Dari:</span> {{ $surat->sender_division }}</div>
             <div><span class="font-semibold text-slate-800">Kepada:</span> {{ $surat->recipient_division }}</div>
+            @if ($ccList !== '')
+                <div class="sm:col-span-2"><span class="font-semibold text-slate-800">CC:</span> {{ $ccList }}</div>
+            @endif
             <div class="sm:col-span-2"><span class="font-semibold text-slate-800">Jenis Surat:</span> {{ $surat->jenis }}</div>
         </div>
 
-        <h2 class="mt-6 text-xl font-semibold text-slate-900">{{ $surat->judul }}</h2>
+        <h2 class="mt-6 text-xl font-semibold uppercase tracking-wide text-slate-900">{{ $documentTitle }}</h2>
+        <h3 class="mt-2 text-lg font-semibold text-slate-900">{{ $surat->judul }}</h3>
         <div class="prose prose-slate mt-3 max-w-none text-slate-700">{!! $surat->isi !!}</div>
 
         @if ($surat->lampiran_path)

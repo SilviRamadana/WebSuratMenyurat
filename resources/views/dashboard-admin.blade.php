@@ -6,10 +6,19 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <div class="rounded-3xl border border-pink-100 bg-white/90 p-8 shadow-[0_30px_60px_-40px_rgba(236,72,153,0.45)]">
-    <div class="flex flex-col gap-2">
-        <div class="text-sm font-semibold uppercase tracking-widest text-pink-600">Admin</div>
-        <h1 class="text-3xl font-semibold text-slate-900">Dashboard</h1>
-        <p class="text-sm text-slate-500">Kelola Akun dan Divisi.</p>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex flex-col gap-2">
+            <div class="text-sm font-semibold uppercase tracking-widest text-pink-600">Admin</div>
+            <h1 class="text-3xl font-semibold text-slate-900">Dashboard</h1>
+            <p class="text-sm text-slate-500">Kelola Akun dan Divisi.</p>
+        </div>
+        <form method="POST" action="{{ route('logout') }}" class="sm:self-start">
+            @csrf
+            <button type="submit" class="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-100">
+                <i data-lucide="log-out" class="h-4 w-4"></i>
+                Logout
+            </button>
+        </form>
     </div>
 
     <div class="mt-6 flex flex-wrap gap-2">
@@ -25,12 +34,16 @@
             <i data-lucide="activity" class="h-4 w-4"></i>
             Monitoring
         </a>
+        <a class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:bg-pink-50" href="{{ route('admin.surat.index') }}">
+            <i data-lucide="mail-open" class="h-4 w-4"></i>
+            Surat Divisi
+        </a>
     </div>
 
     <div class="mt-6 overflow-hidden rounded-2xl border border-pink-100">
         <div class="overflow-auto">
             <table class="w-full text-sm">
-                <thead class="bg-pink-50/60 text-left text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <thead class="bg-emerald-50/70 text-left text-xs font-semibold uppercase tracking-wider text-emerald-800">
                     <tr>
                         <th class="px-4 py-3">Username</th>
                         <th class="px-4 py-3">Email</th>

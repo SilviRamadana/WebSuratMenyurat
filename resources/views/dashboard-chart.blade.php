@@ -42,9 +42,9 @@
                     {
                         label: 'Surat Masuk',
                         data: masukData,
-                        borderColor: '#ff73ea',
-                        backgroundColor: 'rgba(255, 115, 234, 0.2)',
-                        pointBackgroundColor: '#ff9cf0',
+                        borderColor: '#16a34a',
+                        backgroundColor: 'rgba(22, 163, 74, 0.2)',
+                        pointBackgroundColor: '#15803d',
                         pointRadius: 3,
                         tension: 0.35,
                         fill: true,
@@ -52,9 +52,9 @@
                     {
                         label: 'Surat Keluar',
                         data: keluarData,
-                        borderColor: '#ffd0f7',
-                        backgroundColor: 'rgba(255, 208, 247, 0.12)',
-                        pointBackgroundColor: '#ffe6fb',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.16)',
+                        pointBackgroundColor: '#dc2626',
                         pointRadius: 3,
                         tension: 0.35,
                         fill: true,
@@ -68,7 +68,7 @@
                     legend: {
                         display: true,
                         labels: {
-                            color: '#f5f2ff',
+                            color: '#334155',
                             boxWidth: 12,
                             usePointStyle: true,
                         },
@@ -78,11 +78,11 @@
                     y: {
                         beginAtZero: true,
                         suggestedMax: maxValue + 1,
-                        ticks: { precision: 0, color: '#e8dff7' },
-                        grid: { color: 'rgba(255, 122, 232, 0.18)' },
+                        ticks: { precision: 0, color: '#475569' },
+                        grid: { color: 'rgba(148, 163, 184, 0.35)' },
                     },
                     x: {
-                        ticks: { color: '#f5f2ff' },
+                        ticks: { color: '#475569' },
                         grid: { display: false },
                     },
                 },
@@ -91,4 +91,3 @@
     }
 </script>
 @endsection
-

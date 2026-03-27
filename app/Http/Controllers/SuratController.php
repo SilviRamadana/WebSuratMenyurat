@@ -23,9 +23,22 @@ class SuratController extends Controller
             ->orderBy('name')
             ->pluck('name');
 
-        $jenisList = ['Permintaan', 'Memorandum', 'Laporan'];
+        $jenisList = [
+            'Memorandum',
+            'Surat Edaran',
+            'Surat Undangan Rapat',
+            'Surat Tugas',
+            'Surat Keputusan',
+            'Surat Pemberitahuan',
+            'Surat Pengantar',
+        ];
+        $templateList = [
+            'Formal Divisi',
+            'Ringkas Operasional',
+            'Memo Internal',
+        ];
 
-        return view('surat.create', compact('user', 'divisions', 'jenisList'));
+        return view('surat.create', compact('user', 'divisions', 'jenisList', 'templateList'));
     }
 
     public function store(Request $request)
@@ -34,8 +47,16 @@ class SuratController extends Controller
 
         $data = $request->validate([
             'jenis' => ['required', 'string'],
+            'template_name' => ['required', 'string', 'max:60'],
             'judul' => ['required', 'string', 'max:150'],
             'isi' => ['required', 'string'],
+            'tembusan' => ['nullable', 'array'],
+            'tembusan.*' => [
+                'required',
+                'string',
+                'exists:divisions,name',
+                Rule::notIn(array_filter([$user->division])),
+            ],
             'lampiran' => ['nullable', 'file', 'mimes:jpg,jpeg,pdf', 'max:10240'],
             'recipient_divisions' => ['required', 'array', 'min:1'],
             'recipient_divisions.*' => [
@@ -58,6 +79,13 @@ class SuratController extends Controller
             ->unique()
             ->values();
 
+        $tembusanList = collect($data['tembusan'] ?? [])
+            ->map(fn ($item) => trim((string) $item))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $now = now(config('app.timezone'));
         $sequence = $this->nextSequence($user->division, $now->format('Y'));
         $lastSurat = null;
@@ -65,14 +93,23 @@ class SuratController extends Controller
         foreach ($recipients as $recipientDivision) {
             $nomorSurat = $this->buildNomorSurat($user->division, $sequence, $now);
             $sequence++;
+            $displayTembusanList = $recipients
+                ->concat($tembusanList)
+                ->filter()
+                ->unique()
+                ->values()
+                ->all();
 
             $surat = Surat::create([
                 'parent_id' => null,
                 'sender_user_id' => $user->id,
                 'sender_division' => $user->division,
                 'recipient_division' => $recipientDivision,
+                'cc_divisions' => $tembusanList,
+                'tembusan_list' => $displayTembusanList,
                 'nomor_surat' => $nomorSurat,
                 'jenis' => $data['jenis'],
+                'template_name' => $data['template_name'],
                 'judul' => $data['judul'],
                 'isi' => $data['isi'],
                 'lampiran_path' => $lampiranPath,
@@ -93,27 +130,25 @@ class SuratController extends Controller
         $statusMessage = 'Surat terkirim ke ' . $recipients->count() . ' divisi.';
 
         return redirect()
-            ->route('dashboard')
+            ->route('surat.outbox')
             ->with('status', $statusMessage);
     }
 
     public function inbox()
     {
         $user = Auth::user();
+        $division = $user->division;
 
-        $unreadSurats = Surat::where('recipient_division', $user->division)
+        $unreadSurats = Surat::where(function ($query) use ($division) {
+            $query->where('recipient_division', $division)
+                ->orWhereJsonContains('cc_divisions', $division);
+        })
             ->whereNull('archived_at')
             ->where('status', 'Terkirim')
             ->orderByDesc('sent_at')
             ->get();
 
-        $readSurats = Surat::where('recipient_division', $user->division)
-            ->whereNull('archived_at')
-            ->where('status', '!=', 'Terkirim')
-            ->orderByDesc('sent_at')
-            ->get();
-
-        return view('surat.inbox', compact('unreadSurats', 'readSurats'));
+        return view('surat.inbox', compact('unreadSurats'));
     }
 
     public function outbox()
@@ -132,13 +167,17 @@ class SuratController extends Controller
     public function archiveIndex()
     {
         $user = Auth::user();
+        $division = $user->division;
         $tipe = request()->query('tipe', 'all');
         if (!in_array($tipe, ['all', 'masuk', 'keluar'], true)) {
             $tipe = 'all';
         }
 
         $surats = Surat::query()
-            ->where('recipient_division', $user->division)
+            ->where(function ($query) use ($division) {
+                $query->where('recipient_division', $division)
+                    ->orWhereJsonContains('cc_divisions', $division);
+            })
             ->whereNotNull('archived_at')
             ->when($tipe === 'keluar', function ($query) use ($user) {
                 $query->where('sender_user_id', $user->id);
@@ -150,6 +189,31 @@ class SuratController extends Controller
             ->get();
 
         return view('surat.archive', compact('surats', 'tipe'));
+    }
+
+    public function adminIndex(Request $request)
+    {
+        $user = Auth::user();
+        if ($user->role !== 'Admin') {
+            return redirect()->route('dashboard');
+        }
+
+        $tipe = $request->query('tipe', 'masuk');
+        if (!in_array($tipe, ['masuk', 'keluar'], true)) {
+            $tipe = 'masuk';
+        }
+
+        $surats = Surat::query()
+            ->when($tipe === 'masuk', function ($query) {
+                $query->where('status', 'Terkirim');
+            })
+            ->when($tipe === 'keluar', function ($query) {
+                $query->where('status', '!=', 'Terkirim');
+            })
+            ->orderByDesc('sent_at')
+            ->get();
+
+        return view('admin-surat', compact('surats', 'tipe'));
     }
 
     public function show(Surat $surat)
@@ -223,11 +287,27 @@ class SuratController extends Controller
         $user = Auth::user();
         $this->authorizeAccess($surat, $user);
 
-        $surat->update([
-            'archived_at' => now(),
-        ]);
+        if ($surat->archived_at === null) {
+            $surat->update([
+                'archived_at' => now(),
+            ]);
+        }
 
-        return redirect()->route('surat.archive');
+        return back()->with('status', 'Surat diarsipkan.');
+    }
+
+    public function unarchive(Surat $surat)
+    {
+        $user = Auth::user();
+        $this->authorizeAccess($surat, $user);
+
+        if ($surat->archived_at !== null) {
+            $surat->update([
+                'archived_at' => null,
+            ]);
+        }
+
+        return back()->with('status', 'Surat dikembalikan.');
     }
 
     public function markDone(Surat $surat)
@@ -313,6 +393,10 @@ class SuratController extends Controller
         }
 
         if ($surat->recipient_division === $user->division) {
+            return;
+        }
+
+        if (in_array($user->division, $surat->cc_divisions ?? [], true)) {
             return;
         }
 

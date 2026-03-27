@@ -9,7 +9,6 @@
             <h1 class="text-2xl font-semibold text-slate-900">Arsip Surat</h1>
             <p class="mt-2 text-sm text-slate-500">Semua surat dengan filter masuk atau keluar.</p>
         </div>
-        <a class="inline-flex items-center gap-2 rounded-full border border-pink-200 bg-white px-4 py-2 text-sm font-semibold text-pink-700 shadow-sm transition hover:bg-pink-50" href="{{ route('dashboard') }}">Dashboard</a>
     </div>
 
     <div class="mb-5 flex flex-wrap items-center gap-2">
@@ -31,21 +30,11 @@
                         <th class="px-4 py-3">Pengirim</th>
                         <th class="px-4 py-3">Penerima</th>
                         <th class="px-4 py-3">Tipe</th>
-                        <th class="px-4 py-3">Status</th>
                         <th class="px-4 py-3 text-right">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-pink-100/70 bg-white">
                     @foreach ($surats as $surat)
-                        @php
-                            $statusClass = match (strtolower($surat->status)) {
-                                'draft' => 'bg-slate-100 text-slate-700',
-                                'sent' => 'bg-sky-100 text-sky-700',
-                                'done' => 'bg-emerald-100 text-emerald-700',
-                                'archived' => 'bg-amber-100 text-amber-700',
-                                default => 'bg-pink-100 text-pink-700',
-                            };
-                        @endphp
                         <tr>
                             <td class="px-4 py-3 text-slate-600">{{ optional($surat->sent_at)?->timezone(config('app.timezone'))->format('d M Y H:i') ?? '-' }}</td>
                             <td class="px-4 py-3 font-medium text-slate-800">{{ $surat->nomor_surat ?? '-' }}</td>
@@ -62,10 +51,15 @@
                                 @endif
                             </td>
                             <td class="px-4 py-3">
-                                <span class="inline-flex rounded-full px-3 py-1 text-xs font-semibold {{ $statusClass }}">{{ $surat->status }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-right">
-                                <a class="text-sm font-semibold text-pink-700 hover:text-pink-800" href="{{ route('surat.show', $surat) }}">Detail</a>
+                                <div class="flex items-center justify-end gap-3">
+                                    <a class="text-sm font-semibold text-pink-700 hover:text-pink-800" href="{{ route('surat.show', $surat) }}">Detail</a>
+                                    <form method="POST" action="{{ route('surat.archive.remove', $surat) }}">
+                                        @csrf
+                                        <button type="submit" class="text-sm font-semibold text-rose-600 hover:text-rose-700">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

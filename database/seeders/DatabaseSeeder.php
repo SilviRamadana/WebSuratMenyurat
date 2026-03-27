@@ -116,7 +116,20 @@ class DatabaseSeeder extends Seeder
         $divisionNames = Division::query()->pluck('name')->values();
         $usersWithDivision = User::query()->whereNotNull('division')->get();
 
-        $jenisList = ['Permintaan', 'Memorandum', 'Laporan'];
+        $jenisList = [
+            'Permintaan',
+            'Memorandum',
+            'Laporan',
+            'P3K',
+            'Surat Tugas',
+            'Perizinan',
+            'Cuti',
+            'Pengadaan',
+            'K3/Insiden',
+            'Pengumuman',
+            'Undangan',
+            'Notulen',
+        ];
         $judulList = [
             'Permintaan data pendukung',
             'Permohonan tindak lanjut',
@@ -212,7 +225,7 @@ class DatabaseSeeder extends Seeder
                 $recipientDivision = $recipientPool->random();
                 $forceTerkirim = $i === 0;
                 $status = $forceTerkirim ? 'Terkirim' : null;
-                $makeSurat($user, $recipientDivision, $status, $forceTerkirim);
+                $makeSurat($user, $recipientDivision, $status, true);
             }
         }
 
@@ -224,7 +237,7 @@ class DatabaseSeeder extends Seeder
 
             while ($incomingCount < $targetIncoming) {
                 $sender = $usersWithDivision->where('id', '!=', $user->id)->random();
-                $makeSurat($sender, $user->division);
+                $makeSurat($sender, $user->division, null, true);
                 $incomingCount++;
             }
         }
